@@ -26,7 +26,7 @@ namespace RMP_server.server
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            using (SerialPort serialPort = new SerialPort("COM4", 9600))
+            using (SerialPort serialPort = new SerialPort(getCOMPort(), 9600))
             {
                 try
                 {
