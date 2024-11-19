@@ -246,7 +246,9 @@
     <Compile Include="data\SystemData.cs" />
     <Compile Include="program.cs" />
     <Compile Include="server\DataServer.cs" />
-    <Compile Include="server\DataService.cs" />
+    <Compile Include="server\DataPacker.cs" />
+    <Compile Include="server\SerialPortService.cs" />
+    <Compile Include="utils\ConfigManager.cs" />
     <Compile Include="utils\ConsoleManager.cs" />
     <Compile Include="utils\EventLogger.cs" />
     <Compile Include="utils\NVMLManager.cs" />
@@ -274,6 +276,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="nvml.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="config\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

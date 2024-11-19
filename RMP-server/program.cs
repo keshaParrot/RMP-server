@@ -21,23 +21,36 @@ namespace RMP_server
             Thread workerThread = new Thread(() =>
             {
                 try
-                {
+                {       
                     HostApplicationBuilder builder = Host.CreateApplicationBuilder();
                     builder.Services.AddWindowsService(options =>
                     {
                         options.ServiceName = "RMPServer";
                     });
 
-                    builder.Services.AddSingleton<DataService>();
-                    builder.Services.AddHostedService<DataServerService>();
+                    string sendOption = ConfigManager.GetDataReceptionMode();
 
+                    builder.Services.AddSingleton<DataPacker>();
+                    if (sendOption == "UART")
+                    {
+                        builder.Services.AddHostedService<SerialPortService>();
+                    }
+                    else if (sendOption == "TCPIP")
+                    {
+                        builder.Services.AddHostedService<DataServerService>();
+                    }
+                    else
+                    {
+                        EventLogger.Log("Error while creating service, was not providet option on config.");
+                        Environment.Exit(-1);
+                    }
                     IHost host = builder.Build();
 
                     host.Run();
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error: {ex.Message}");
+                    EventLogger.Log($"Error: {ex.Message}");
                 }
             });
 

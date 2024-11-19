@@ -21,9 +21,9 @@ namespace RMP_server.server
 
         private TcpListener listener;
         private readonly ILogger<DataServerService> _logger;
-        private readonly DataService _dataService;
+        private readonly DataPacker _dataService;
 
-        public DataServerService(DataService dataService, ILogger<DataServerService> logger)
+        public DataServerService(DataPacker dataService, ILogger<DataServerService> logger)
         {
             _dataService = dataService;
             _logger = logger;
@@ -90,16 +90,13 @@ namespace RMP_server.server
 
         private static string GetHostAddress()
         {
-            try
+            string userIP = ConfigManager.GetIpAddress();
+            if (!string.IsNullOrEmpty(userIP))
             {
-                string configContent = File.ReadAllText("config.txt");
-                return configContent.Trim();
+                return userIP;
             }
-            catch (Exception ex)
-            {
-                EventLogger.Log("Error reading config: " + ex.Message);
-                return null;
-            }
+            EventLogger.Log("user ip is not providet");
+            return null;
         }
     }
 }

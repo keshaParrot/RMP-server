@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace RMP_server.server
 {
 
-    public class DataService
+    public class DataPacker
     {
         private static CPUDataCollector CPUInstance;
         private static GPUDataCollector GPUInstance;
