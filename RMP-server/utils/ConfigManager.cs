@@ -39,21 +39,11 @@ namespace RMP_server.utils
                 ["IpAddress"] = null
             };
 
-           
-            var comment = "// set TCPIP for sending data by TCP, and UART for UART\n" +
-                          "// provide the IP address for TCPIP communication\n";
             var jsonConfig = JsonConvert.SerializeObject(defaultConfig, Formatting.Indented);
 
-            File.WriteAllText(ConfigFileName, comment + jsonConfig);
+            File.WriteAllText(ConfigFileName, jsonConfig);
 
             EventLogger.Log($"file {ConfigFileName} was created with default values .");
-        }
-        private static string FormatConfigWithComment(JObject config)
-        {
-            var comment = "// set TCPIP for sending data by TCP, and UART for UART\n" +
-                          "// provide the IP address for TCPIP communication\n";
-            var jsonConfig = JsonConvert.SerializeObject(config, Formatting.Indented);
-            return comment + jsonConfig;
         }
         private static void EnsureConfigFileExists()
         {

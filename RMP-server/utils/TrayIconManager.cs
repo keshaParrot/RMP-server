@@ -47,6 +47,7 @@ namespace RMP_server.utils
         }
         private void Exit(object sender, EventArgs e)
         {
+            EventLogger.Log("server was closed, now you can close console.");
             Application.Exit();
         }
 
