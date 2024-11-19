@@ -14,16 +14,16 @@ using System.Threading;
 
 namespace RMP_server.server
 {
-    public class DataServerService : BackgroundService
+    public class TCPService : BackgroundService
     {
         private const int Port = 12345;
         private static string IpAddress = "192.168.0.64";
 
         private TcpListener listener;
-        private readonly ILogger<DataServerService> _logger;
+        private readonly ILogger<TCPService> _logger;
         private readonly DataPacker _dataService;
 
-        public DataServerService(DataPacker dataService, ILogger<DataServerService> logger)
+        public TCPService(DataPacker dataService, ILogger<TCPService> logger)
         {
             _dataService = dataService;
             _logger = logger;

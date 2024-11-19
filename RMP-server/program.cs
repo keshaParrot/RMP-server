@@ -34,10 +34,12 @@ namespace RMP_server
                     if (sendOption == "UART")
                     {
                         builder.Services.AddHostedService<SerialPortService>();
+                        EventLogger.Log("set worker as SerialPortService.");
                     }
                     else if (sendOption == "TCPIP")
                     {
-                        builder.Services.AddHostedService<DataServerService>();
+                        builder.Services.AddHostedService<TCPService>();
+                        EventLogger.Log("set worker as DataServerService.");
                     }
                     else
                     {

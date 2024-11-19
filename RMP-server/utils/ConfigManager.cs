@@ -15,11 +15,7 @@ namespace RMP_server.utils
 
         public static string GetDataReceptionMode()
         {
-            if (!File.Exists(ConfigFileName))
-            {
-                CreateDefaultConfigFile();
-            }
-
+            EnsureConfigFileExists();
             var configText = File.ReadAllText(ConfigFileName);
             var config = JObject.Parse(configText);
             return config["DataReceptionMode"]?.ToString();
@@ -31,12 +27,20 @@ namespace RMP_server.utils
             var config = JObject.Parse(configText);
             return config["IpAddress"]?.ToString();
         }
+        public static string GetComPort()
+        {
+            EnsureConfigFileExists();
+            var configText = File.ReadAllText(ConfigFileName);
+            var config = JObject.Parse(configText);
+            return config["COM"]?.ToString();
+        }
         private static void CreateDefaultConfigFile()
         {
             var defaultConfig = new JObject
             {
                 ["DataReceptionMode"] = null,
-                ["IpAddress"] = null
+                ["IpAddress"] = null,
+                ["COM"] = null
             };
 
             var jsonConfig = JsonConvert.SerializeObject(defaultConfig, Formatting.Indented);

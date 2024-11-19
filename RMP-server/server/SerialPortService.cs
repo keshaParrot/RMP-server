@@ -26,23 +26,77 @@ namespace RMP_server.server
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            SerialPort serialPort = new SerialPort("COM3", 9600);
-            serialPort.Open();
-
-            if (serialPort.IsOpen)
+            using (SerialPort serialPort = new SerialPort("COM4", 9600))
             {
-                SystemData systemData = _dataService.packAllData();
-                string json = JsonConvert.SerializeObject(systemData);
+                try
+                {
+                    serialPort.Open();
+                    _logger.LogInformation("Serial port opened. Waiting for requests.");
+                    EventLogger.Log("Serial port opened. Waiting for requests.");
 
-                serialPort.WriteLine(json);
-                EventLogger.Log("Data sent: " + json);
+                    while (!stoppingToken.IsCancellationRequested)
+                    {
+                        if (serialPort.BytesToRead > 0)
+                        {
+                            string request = serialPort.ReadLine();
+                            _logger.LogInformation($"Received request: {request}");
+                            EventLogger.Log($"Received request: {request}");
+
+                            if (request == "GET_DATA")
+                            {
+                                SystemData systemData = _dataService.packAllData();
+                                string json = JsonConvert.SerializeObject(systemData);
+
+                                serialPort.WriteLine(json);
+                                _logger.LogInformation($"Data sent: {json}");
+                                EventLogger.Log($"Data sent: {json}");
+                            }
+                            else
+                            {
+                                _logger.LogWarning($"Unknown request: {request}");
+                                EventLogger.Log($"Unknown request: {request}");
+                            }
+                        }
+
+                        if (!stoppingToken.IsCancellationRequested)
+                        {
+                            SystemData systemData = _dataService.packAllData();
+                            string json = JsonConvert.SerializeObject(systemData);
+
+                            serialPort.WriteLine(json);
+                            _logger.LogInformation($"Data sent: {json}");
+                            EventLogger.Log($"Data sent: {json}");
+
+                            await Task.Delay(5000, stoppingToken);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Error with serial port: {ex.Message}");
+                    EventLogger.Log($"Error with serial port: {ex.Message}");
+                }
+                finally
+                {
+                    if (serialPort.IsOpen)
+                    {
+                        serialPort.Close();
+                        _logger.LogInformation("Serial port closed.");
+                        EventLogger.Log("Serial port closed.");
+                    }
+                }
             }
-            else
+        }
+        private static string getCOMPort()
+        {
+            string COMPort = ConfigManager.GetComPort();
+            if (!string.IsNullOrEmpty(COMPort))
             {
-                EventLogger.Log("Failed to open port.");
+                return COMPort;
             }
-
-            serialPort.Close();
+            EventLogger.Log("COM port is not providet");
+            Environment.Exit(-1);
+            return null;
         }
     }
 }

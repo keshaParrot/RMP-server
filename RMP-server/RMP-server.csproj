@@ -245,7 +245,7 @@
     <Compile Include="data\RAMData.cs" />
     <Compile Include="data\SystemData.cs" />
     <Compile Include="program.cs" />
-    <Compile Include="server\DataServer.cs" />
+    <Compile Include="server\TCPServer.cs" />
     <Compile Include="server\DataPacker.cs" />
     <Compile Include="server\SerialPortService.cs" />
     <Compile Include="utils\ConfigManager.cs" />
