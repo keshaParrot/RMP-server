@@ -9,6 +9,8 @@ namespace RMP_server.data
 {
     public class SystemData
     {
+        [JsonProperty("Id")]
+        public string DataId { get; set; }
         [JsonProperty("Cpu")]
         public CPUData Cpu { get; set; }
 
@@ -17,10 +19,12 @@ namespace RMP_server.data
 
         [JsonProperty("Memory")]
         public RAMData Memory { get; set; }
-        public SystemData(CPUData cpu,
+        public SystemData(string guid,
+                        CPUData cpu,
                         GPUData gpu,
                         RAMData memory) 
         {
+            DataId = guid;
             Cpu = cpu;
             Gpu = gpu;
             Memory = memory;

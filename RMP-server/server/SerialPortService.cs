@@ -67,7 +67,7 @@ namespace RMP_server.server
                             _logger.LogInformation($"Data sent: {json}");
                             EventLogger.Log($"Data sent: {json}");
 
-                            await Task.Delay(5000, stoppingToken);
+                            await Task.Delay(getSengInterval(), stoppingToken);
                         }
                     }
                 }
@@ -97,6 +97,10 @@ namespace RMP_server.server
             EventLogger.Log("COM port is not providet");
             Environment.Exit(-1);
             return null;
+        }
+        private static int getSengInterval()
+        {
+            return ConfigManager.GetnIterval();
         }
     }
 }

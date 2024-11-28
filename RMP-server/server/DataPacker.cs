@@ -20,8 +20,9 @@ namespace RMP_server.server
             var cpuData = (CPUData)initCpuCollector().CollectData();
             var gpuData = (GPUData)initGpuCollector().CollectData();
             var ramData = (RAMData)initRAMCollector().CollectData();
+            var DataGUID = Guid.NewGuid();
 
-            SystemData system = new SystemData(cpuData, gpuData, ramData);
+            SystemData system = new SystemData(DataGUID.ToString("N"), cpuData, gpuData, ramData);
             destructCollectors();
 
             return system;

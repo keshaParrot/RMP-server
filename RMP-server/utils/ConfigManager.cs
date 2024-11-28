@@ -34,13 +34,26 @@ namespace RMP_server.utils
             var config = JObject.Parse(configText);
             return config["COM"]?.ToString();
         }
+        public static int GetnIterval()
+        {
+            EnsureConfigFileExists();
+            var configText = File.ReadAllText(ConfigFileName);
+            var config = JObject.Parse(configText);
+            if (!int.TryParse(config["Interval"]?.ToString(), out int interval))
+            {
+                EventLogger.Log("Invalid interval value in config file.");
+            }
+
+            return interval * 1000;
+        }
         private static void CreateDefaultConfigFile()
         {
             var defaultConfig = new JObject
             {
                 ["DataReceptionMode"] = null,
                 ["IpAddress"] = null,
-                ["COM"] = null
+                ["COM"] = null,
+                ["Interval"] = null
             };
 
             var jsonConfig = JsonConvert.SerializeObject(defaultConfig, Formatting.Indented);
