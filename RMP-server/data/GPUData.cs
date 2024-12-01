@@ -15,9 +15,13 @@ namespace RMP_server.data
         [JsonProperty("load")]
         public double load { get; set; }
         [JsonProperty("frequency")]
-        public long[] frequency { get; set; }
+        public Dictionary<String, long> frequency { get; set; }
         [JsonProperty("memoryLoad")]
         public double memoryLoad { get; set; }
+        [JsonProperty("memoryTotal")]
+        public double memoryTotal { get; set; }
+        [JsonProperty("memoryUsed")]
+        public double memoryUsed { get; set; }
         [JsonProperty("temperature")]
         public double temperature { get; set; }
         [JsonProperty("voltage")]
@@ -25,12 +29,14 @@ namespace RMP_server.data
         [JsonProperty("fanSpeed")]
         public double fanSpeed { get; set; }
 
-        public GPUData(string name, double load, long[] frequency, double memoryLoad, double temperature, double voltage, double fanSpeed)
+        public GPUData(string name, double load, Dictionary<String, long> frequency, double memoryLoad, double memoryTotal, double memoryUsed, double temperature, double voltage, double fanSpeed)
         {
             this.name = name;
             this.load = load;
             this.frequency = frequency;
             this.memoryLoad = memoryLoad;
+            this.memoryTotal = memoryTotal;
+            this.memoryUsed = memoryUsed;
             this.temperature = temperature;
             this.voltage = voltage;
             this.fanSpeed = fanSpeed;
@@ -40,11 +46,13 @@ namespace RMP_server.data
         {
             Console.WriteLine("GPU Name: {0}", name);
             Console.WriteLine("GPU Load: {0}%", load);
+            Console.WriteLine("GPU Total: {0}GB", memoryTotal);
+            Console.WriteLine("GPU Used: {0}GB", memoryUsed);
 
             Console.Write("Frequencies: ");
-            for (int i = 0; i < frequency.Length; ++i)
+            foreach (var kvp in frequency)
             {
-                Console.Write("{0} MHz ", frequency[i]);
+                Console.Write(" memory {0} : {1} MHz ", kvp.Key, kvp.Value);
             }
             Console.WriteLine();
 

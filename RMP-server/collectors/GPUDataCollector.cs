@@ -18,7 +18,7 @@ namespace RMP_server.collectors{
             int result = NVMLManager.nvmlInit();
             if (result != NVML_SUCCESS)
             {
-                Console.WriteLine($"Failed to initialize NVML: {result}");
+                EventLogger.Log($"Failed to initialize NVML: {result}");
                 Environment.Exit(-1);
             }
         }
@@ -27,14 +27,17 @@ namespace RMP_server.collectors{
         {
             string name = GetDeviceName();
             double load = GetCentralLoad();
-            long[] frequency = GetFrequency();
+            Dictionary<String, long> frequency = GetFrequency();
             double memoryLoad = GetMemoryLoad();
+            double memoryTotal = GetTotalMemory();
+            double memoryUsed = GetUsedMemory();
             double temperature = GetTemperature();
             double voltage = GetVoltage();
             double fanSpeed = GetFanSpeed();
 
-            return new GPUData(name, load, frequency, memoryLoad, temperature, voltage, fanSpeed);
+            return new GPUData(name, load, frequency, memoryLoad, memoryTotal, memoryUsed, temperature, voltage, fanSpeed);
         }
+
         public void ShutdownNVML()
         {
             nvmlShutdown();
@@ -46,12 +49,23 @@ namespace RMP_server.collectors{
             int result = nvmlDeviceGetHandleByIndex((uint)cardNumber, out device);
             if (result != NVML_SUCCESS)
             {
-                Console.WriteLine($"Failed to get device handle: {result}");
+                EventLogger.Log($"Failed to get device handle: {result}");
                 Environment.Exit(-1);
             }
             return device;
         }
-
+        private NVMLMemory getNVMLMemory()
+        {
+            IntPtr device = GetDevice();
+            NVMLMemory memoryInfo;
+            int result = nvmlDeviceGetMemoryInfo(device, out memoryInfo);
+            if (result != NVML_SUCCESS)
+            {
+                EventLogger.Log($"Failed to get memory info: {result}");
+                return memoryInfo;
+            }
+            return memoryInfo;
+        }
         private string GetDeviceName()
         {
             IntPtr device = GetDevice();
@@ -73,41 +87,54 @@ namespace RMP_server.collectors{
             int result = nvmlDeviceGetUtilizationRates(device, out utilization);
             if (result != NVML_SUCCESS)
             {
-                Console.WriteLine($"Failed to get GPU utilization: {result}");
+                EventLogger.Log($"Failed to get GPU utilization: {result}");
                 return -1.0;
             }
             return utilization.gpu;
         }
 
-        private long[] GetFrequency()
+        private Dictionary<String, long> GetFrequency()
         {
             IntPtr device = GetDevice();
-            uint smClock, memClock;
+            uint smClock, memClock, graphClock, videoClock;
             int result1 = nvmlDeviceGetClockInfo(device, NVMLClockType.NVML_CLOCK_SM, out smClock);
             int result2 = nvmlDeviceGetClockInfo(device, NVMLClockType.NVML_CLOCK_MEM, out memClock);
+            int result3 = nvmlDeviceGetClockInfo(device, NVMLClockType.NVML_CLOCK_GRAPHICS, out graphClock);
+            int result4 = nvmlDeviceGetClockInfo(device, NVMLClockType.NVML_CLOCK_VIDEO, out videoClock);
 
-            if (result1 != NVML_SUCCESS || result2 != NVML_SUCCESS)
+            if (result1 != NVML_SUCCESS || result2 != NVML_SUCCESS || result3 != NVML_SUCCESS || result4 != NVML_SUCCESS)
             {
-                Console.WriteLine($"Failed to get clock info: {result1}, {result2}");
+                EventLogger.Log($"Failed to get clock info: {result1}, {result2}, {result3}, {result3}");
                 return null;
             }
 
-            return new long[] { smClock, memClock };
+            var frequencyDict = new Dictionary<string, long>
+            {
+                { "SM", smClock },
+                { "Memory", memClock },
+                { "Graphic", graphClock },
+                { "Video", videoClock } 
+            };
+
+            return frequencyDict;
         }
 
         private double GetMemoryLoad()
         {
-            IntPtr device = GetDevice();
-            NVMLMemory memoryInfo;
-            int result = nvmlDeviceGetMemoryInfo(device, out memoryInfo);
-            if (result != NVML_SUCCESS)
-            {
-                Console.WriteLine($"Failed to get memory info: {result}");
-                return -1.0;
-            }
+            NVMLMemory memoryInfo = getNVMLMemory();
             return (double)memoryInfo.used / memoryInfo.total.ToInt64() * 100.0;
         }
+        private double GetUsedMemory()
+        {
+            NVMLMemory memoryInfo = getNVMLMemory();
+            return (double)memoryInfo.used / 1024 / 1024;
+        }
 
+        private double GetTotalMemory()
+        {
+            NVMLMemory memoryInfo = getNVMLMemory();
+            return (double)memoryInfo.total / 1024 / 1024;
+        }
         private double GetTemperature()
         {
             IntPtr device = GetDevice();
@@ -115,7 +142,7 @@ namespace RMP_server.collectors{
             int result = nvmlDeviceGetTemperature(device, NVMLTemperatureSensor.NVML_TEMPERATURE_GPU, out temperature);
             if (result != NVML_SUCCESS)
             {
-                Console.WriteLine($"Failed to get temperature: {result}");
+                EventLogger.Log($"Failed to get temperature: {result}");
                 return -1.0;
             }
             return temperature;
@@ -128,7 +155,7 @@ namespace RMP_server.collectors{
             int result = nvmlDeviceGetPowerUsage(device, out voltage);
             if (result != NVML_SUCCESS)
             {
-                Console.WriteLine($"Failed to get voltage: {result}");
+                EventLogger.Log($"Failed to get voltage: {result}");
                 return -1.0;
             }
             return (double)voltage / 1000.0;
@@ -141,11 +168,10 @@ namespace RMP_server.collectors{
             int result = nvmlDeviceGetFanSpeed(device, out fanSpeed);
             if (result != NVML_SUCCESS)
             {
-                Console.WriteLine($"Failed to get fan speed: {result}");
+                EventLogger.Log($"Failed to get fan speed: {result}");
                 return -1.0;
             }
             return fanSpeed;
         }
-
     }
 }
