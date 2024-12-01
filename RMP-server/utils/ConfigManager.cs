@@ -42,6 +42,7 @@ namespace RMP_server.utils
             if (!int.TryParse(config["Interval"]?.ToString(), out int interval))
             {
                 EventLogger.Log("Invalid interval value in config file.");
+                Environment.Exit(-1);
             }
 
             return interval * 1000;
